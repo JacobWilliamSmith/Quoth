@@ -84,7 +84,7 @@ public class Library {
                 }
             }
             long after = ZonedDateTime.now().toInstant().toEpochMilli();
-            double elapsed = (after - before) / 1000;
+            double elapsed = (after - before) / 1000.0;
             System.out.println("Time elapsed: " + elapsed + " seconds");
         } catch (IOException ioe) {
             System.out.println("Warning: IO Exception detected");
@@ -102,6 +102,6 @@ public class Library {
         }
     }
 
-    
+
 
 }
