@@ -15,7 +15,8 @@ public class Library {
 
     private static final int MAX_INPUT_LENGTH = 32;
     private static final int MIN_INPUT_LENGTH = 4;
-    private static final String STORAGE_ROOT = System.getProperty("user.dir") + "\\Data\\";
+    private static final String QUOTE_STORAGE_ROOT = System.getProperty("user.dir") + "\\data\\quotes\\";
+    private static final String SOURCE_STORAGE_ROOT = System.getProperty("user.dir") + "\\data\\sources\\";
     private static final String DEBUG_ROOT = System.getProperty("user.dir") + "\\Debug\\";
     public static void main(String[] args) {
         addToLibrary(DEBUG_ROOT + "Jack and Jill.txt");
@@ -32,7 +33,7 @@ public class Library {
     }
 
     private static String convertToFilePath(String input) {
-        return STORAGE_ROOT + input.replaceAll(".(?!$)", "$0\\\\");
+        return QUOTE_STORAGE_ROOT + input.replaceAll(".(?!$)", "$0\\\\");
     }
 
     private static String[] readFileByLines(String filepath) throws IOException {
@@ -100,5 +101,7 @@ public class Library {
             System.out.println("Warning: IO Exception detected");
         }
     }
+
+    
 
 }
