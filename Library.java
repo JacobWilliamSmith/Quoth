@@ -50,21 +50,19 @@ public class Library {
     }
 
     private static void appendToFile(String filepath, String message) throws IOException {
-        Path p = Paths.get(filepath);
-        if(Files.notExists(p)) {
-            Files.createDirectories(p.getParent());
-            Files.createFile(p);
-        }
+        createFileIfNotExists(filepath);
         for(String line : readFileByLines(filepath)) {
             if(line.equals(message)) {
                 return;
             }
         }
-        Files.write(p, (message+"\r\n").getBytes(), StandardOpenOption.APPEND);
+        Files.write(Paths.get(filepath), (message+"\r\n").getBytes(), StandardOpenOption.APPEND);
     }
 
     public static String[] query(String input) {
         try {
+            createFileIfNotExists(QUOTE_STORAGE_ROOT);
+            createFileIfNotExists(SOURCE_STORAGE_ROOT);
             return readFileByLines(convertToFilePath(crop(removeCharacters(input)))+"\\sources.txt");
         } catch (IOException ioe) {
             System.out.println("Warning: IO Exception detected");
@@ -88,6 +86,14 @@ public class Library {
             System.out.println("Time elapsed: " + elapsed + " seconds");
         } catch (IOException ioe) {
             System.out.println("Warning: IO Exception detected");
+        }
+    }
+
+    private static void createFileIfNotExists(String filepath) throws IOException {
+        Path p = Paths.get(filepath);
+        if(Files.notExists(p)) {
+            Files.createDirectories(p.getParent());
+            Files.createFile(p);
         }
     }
 
