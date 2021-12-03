@@ -10,59 +10,31 @@ import java.nio.file.StandardOpenOption;
 import java.time.ZonedDateTime;
 import java.util.stream.Stream;
 
-
 public class Library {
 
     private static final int MAX_INPUT_LENGTH = 32;
     private static final int MIN_INPUT_LENGTH = 4;
-    private static final String QUOTE_STORAGE_ROOT = System.getProperty("user.dir") + "\\data\\quotes\\";
-    private static final String SOURCE_STORAGE_ROOT = System.getProperty("user.dir") + "\\data\\sources\\";
-    private static final String DEBUG_ROOT = System.getProperty("user.dir") + "\\Debug\\";
+    private static final String STORAGE_ROOT = System.getProperty("user.dir") + "\\data\\";
+    private static final String DEBUG_ROOT = System.getProperty("user.dir") + "\\debug\\";
     public static void main(String[] args) {
-        addToLibrary(DEBUG_ROOT + "Jack and Jill.txt");
+        
     }
 
-    private static String crop(String input) {
-        return input.substring(0, Math.min(input.length(), MAX_INPUT_LENGTH));
-    }
-
-    private static String removeCharacters(String input) {
-        return input.replaceAll("[^a-zA-Z0-9]","")
-                    .replaceAll("[aeiouAEIOU]","")
-                    .toLowerCase();
-    }
-
-    private static String convertToFilePath(String input) {
-        return QUOTE_STORAGE_ROOT + input.replaceAll(".(?!$)", "$0\\\\");
-    }
-
-    private static String[] readFileByLines(String filepath) throws IOException {
-        if(Files.notExists(Paths.get(filepath))) {
-            return new String[0];
+    public static void addToLibrary(String filepath) {
+        try {
+            Path p = Paths.get(filepath);
+            String quote = new String(Files.readAllBytes(p));
+            String source = p.getFileName().toString();
+            addToLibrary(quote, source);
+        } catch (IOException ioe) {
+            System.out.println("Warning: IO Exception detected");
         }
-        try (BufferedReader br = new BufferedReader(new FileReader(new File(filepath)))) {
-            try (Stream<String> stream = Files.lines(Paths.get(filepath), StandardCharsets.UTF_8)) {
-                String[] lines = new String[(int) stream.count()];
-                for(int i = 0; i < lines.length; lines[i++] = br.readLine());
-                return lines;
-            }
-        }
-    }
-
-    private static void appendToFile(String filepath, String message) throws IOException {
-        createFileIfNotExists(filepath);
-        for(String line : readFileByLines(filepath)) {
-            if(line.equals(message)) {
-                return;
-            }
-        }
-        Files.write(Paths.get(filepath), (message+"\r\n").getBytes(), StandardOpenOption.APPEND);
     }
 
     public static String[] query(String input) {
         try {
-            createFileIfNotExists(QUOTE_STORAGE_ROOT);
-            createFileIfNotExists(SOURCE_STORAGE_ROOT);
+            createFileIfNotExists(STORAGE_ROOT + "quotes\\");
+            createFileIfNotExists(STORAGE_ROOT + "sources\\");
             return readFileByLines(convertToFilePath(crop(removeCharacters(input)))+"\\sources.txt");
         } catch (IOException ioe) {
             System.out.println("Warning: IO Exception detected");
@@ -89,6 +61,47 @@ public class Library {
         }
     }
 
+    public static void deleteLibrary() {
+        deleteDir(new File(STORAGE_ROOT));
+    }
+
+    private static String crop(String input) {
+        return input.substring(0, Math.min(input.length(), MAX_INPUT_LENGTH));
+    }
+
+    private static String removeCharacters(String input) {
+        return input.replaceAll("[^a-zA-Z0-9]","")
+                    .replaceAll("[aeiouAEIOU]","")
+                    .toLowerCase();
+    }
+
+    private static String convertToFilePath(String input) {
+        return STORAGE_ROOT + "quotes\\" + input.replaceAll(".(?!$)", "$0\\\\");
+    }
+
+    private static void appendToFile(String filepath, String message) throws IOException {
+        createFileIfNotExists(filepath);
+        for(String line : readFileByLines(filepath)) {
+            if(line.equals(message)) {
+                return;
+            }
+        }
+        Files.write(Paths.get(filepath), (message+"\r\n").getBytes(), StandardOpenOption.APPEND);
+    }
+
+    private static String[] readFileByLines(String filepath) throws IOException {
+        if(Files.notExists(Paths.get(filepath))) {
+            return new String[0];
+        }
+        try (BufferedReader br = new BufferedReader(new FileReader(new File(filepath)))) {
+            try (Stream<String> stream = Files.lines(Paths.get(filepath), StandardCharsets.UTF_8)) {
+                String[] lines = new String[(int) stream.count()];
+                for(int i = 0; i < lines.length; lines[i++] = br.readLine());
+                return lines;
+            }
+        }
+    }
+
     private static void createFileIfNotExists(String filepath) throws IOException {
         Path p = Paths.get(filepath);
         if(Files.notExists(p)) {
@@ -96,18 +109,14 @@ public class Library {
             Files.createFile(p);
         }
     }
-
-    public static void addToLibrary(String filepath) {
-        try {
-            Path p = Paths.get(filepath);
-            String quote = new String(Files.readAllBytes(p));
-            String source = p.getFileName().toString();
-            addToLibrary(quote, source);
-        } catch (IOException ioe) {
-            System.out.println("Warning: IO Exception detected");
+    
+    private static void deleteDir(File file) {
+        File[] contents = file.listFiles();
+        if (contents != null) {
+            for (File f : contents) {
+                deleteDir(f);
+            }
         }
+        file.delete();
     }
-
-
-
 }
