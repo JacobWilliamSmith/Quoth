@@ -20,6 +20,29 @@ public class Library {
         
     }
 
+    ///////////////////////////////////////////////////////////////////
+    ///// PUBLIC METHODS: These should be called directly by main /////
+    ///////////////////////////////////////////////////////////////////
+
+    public static void addToLibrary(String quote, String source) {
+        try {
+            quote = removeCharacters(quote);
+            long before = ZonedDateTime.now().toInstant().toEpochMilli();
+            for(int start = 0; start + MIN_INPUT_LENGTH <= quote.length(); start++) {
+                for(int end = Math.min(start + MAX_INPUT_LENGTH, quote.length()); end - start >= MIN_INPUT_LENGTH; end--) {
+                    String filepath = convertToFilePath(quote.substring(start, end))+"\\sources.txt";
+                    // System.out.println("Appending to file: " + filepath);
+                    appendToFile(filepath, source);
+                }
+            }
+            long after = ZonedDateTime.now().toInstant().toEpochMilli();
+            double elapsed = (after - before) / 1000.0;
+            System.out.println("Time elapsed: " + elapsed + " seconds");
+        } catch (IOException ioe) {
+            System.out.println("Warning: IO Exception detected");
+        }
+    }
+    
     public static void addToLibrary(String filepath) {
         try {
             Path p = Paths.get(filepath);
@@ -42,28 +65,13 @@ public class Library {
         }
     }
 
-    public static void addToLibrary(String quote, String source) {
-        try {
-            quote = removeCharacters(quote);
-            long before = ZonedDateTime.now().toInstant().toEpochMilli();
-            for(int start = 0; start + MIN_INPUT_LENGTH <= quote.length(); start++) {
-                for(int end = Math.min(start + MAX_INPUT_LENGTH, quote.length()); end - start >= MIN_INPUT_LENGTH; end--) {
-                    String filepath = convertToFilePath(quote.substring(start, end))+"\\sources.txt";
-                    // System.out.println("Appending to file: " + filepath);
-                    appendToFile(filepath, source);
-                }
-            }
-            long after = ZonedDateTime.now().toInstant().toEpochMilli();
-            double elapsed = (after - before) / 1000.0;
-            System.out.println("Time elapsed: " + elapsed + " seconds");
-        } catch (IOException ioe) {
-            System.out.println("Warning: IO Exception detected");
-        }
-    }
-
     public static void deleteLibrary() {
         deleteDir(new File(STORAGE_ROOT));
     }
+
+    ////////////////////////////////////////////////////////////////////////
+    ///// PRIVATE METHODS: These should not be called directly by main /////
+    ////////////////////////////////////////////////////////////////////////
 
     private static String crop(String input) {
         return input.substring(0, Math.min(input.length(), MAX_INPUT_LENGTH));
