@@ -20,13 +20,21 @@ public class Library {
     private static final String STORAGE_ROOT = System.getProperty("user.dir") + "\\..\\data\\";
     private static final String DEBUG_ROOT = System.getProperty("user.dir") + "\\debug\\";
     public static void main(String[] args) {
-        addToLibrary(DEBUG_ROOT + "Jack and Jill.txt");
-        query("Jack fell down and broke his crown");
+        addDirToLibrary(DEBUG_ROOT);
     }
 
     ///////////////////////////////////////////////////////////////////
     ///// PUBLIC METHODS: These should be called directly by main /////
     ///////////////////////////////////////////////////////////////////
+
+    public static void addDirToLibrary(String folder) {
+        File f = new File(folder);
+        for (final File fileEntry : f.listFiles()) {
+            if(! fileEntry.isDirectory()) {
+                addToLibrary(fileEntry.getAbsolutePath());
+            }
+        }
+    }
 
     public static void addToLibrary(String quote, String source) {
         delimit();
