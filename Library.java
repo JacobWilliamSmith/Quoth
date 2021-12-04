@@ -15,11 +15,12 @@ import java.util.stream.Stream;
 
 public class Library {
 
-    private static final int MAX_INPUT_LENGTH = 8;
-    private static final int MIN_INPUT_LENGTH = 4;
+    private static final int MAX_INPUT_LENGTH = 6;
+    private static final int MIN_INPUT_LENGTH = 6;
     private static final String STORAGE_ROOT = System.getProperty("user.dir") + "\\..\\data\\";
     private static final String DEBUG_ROOT = System.getProperty("user.dir") + "\\debug\\";
     public static void main(String[] args) {
+        deleteLibrary();
         addDirToLibrary(DEBUG_ROOT);
     }
 
