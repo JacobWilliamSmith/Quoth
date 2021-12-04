@@ -62,6 +62,7 @@ public class Library {
             Path p = Paths.get(filepath);
             String quote = new String(Files.readAllBytes(p));
             String source = p.getFileName().toString();
+            source = source.substring(0, source.lastIndexOf('.'));
             addToLibrary(quote, source);
         } catch (IOException ioe) {
             System.out.println("Warning: IO Exception detected");
