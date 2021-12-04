@@ -14,10 +14,11 @@ public class Library {
 
     private static final int MAX_INPUT_LENGTH = 32;
     private static final int MIN_INPUT_LENGTH = 4;
-    private static final String STORAGE_ROOT = System.getProperty("user.dir") + "\\data\\";
+    private static final String STORAGE_ROOT = System.getProperty("user.dir") + "\\..\\data\\";
     private static final String DEBUG_ROOT = System.getProperty("user.dir") + "\\debug\\";
     public static void main(String[] args) {
-        
+        addToLibrary(DEBUG_ROOT + "Jack and Jill.txt");
+
     }
 
     ///////////////////////////////////////////////////////////////////
@@ -28,11 +29,19 @@ public class Library {
         try {
             quote = removeCharacters(quote);
             long before = ZonedDateTime.now().toInstant().toEpochMilli();
-            for(int start = 0; start + MIN_INPUT_LENGTH <= quote.length(); start++) {
-                for(int end = Math.min(start + MAX_INPUT_LENGTH, quote.length()); end - start >= MIN_INPUT_LENGTH; end--) {
+
+            int maxIterations = ((MAX_INPUT_LENGTH - MIN_INPUT_LENGTH + 1) 
+                              * (quote.length() - MAX_INPUT_LENGTH))
+                              + (int) ((((quote.length() - (MIN_INPUT_LENGTH + (quote.length() - ((MAX_INPUT_LENGTH + MIN_INPUT_LENGTH + 1.0) / 2))) + 1)
+                              * (MAX_INPUT_LENGTH - MIN_INPUT_LENGTH)) + 0.5))
+                              + 1;
+            
+            for (int start = 0, currentIteration = 0; start + MIN_INPUT_LENGTH <= quote.length(); start++) {
+                for (int end = Math.min(start + MAX_INPUT_LENGTH, quote.length()); end - start >= MIN_INPUT_LENGTH; end--) {
                     String filepath = convertToFilePath(quote.substring(start, end))+"\\sources.txt";
-                    // System.out.println("Appending to file: " + filepath);
                     appendToFile(filepath, source);
+                    currentIteration++;
+                    trackProgress(currentIteration, maxIterations);
                 }
             }
             long after = ZonedDateTime.now().toInstant().toEpochMilli();
@@ -72,6 +81,29 @@ public class Library {
     ////////////////////////////////////////////////////////////////////////
     ///// PRIVATE METHODS: These should not be called directly by main /////
     ////////////////////////////////////////////////////////////////////////
+    private static void trackProgress(int current, int total) {
+        if (current > total) {
+            throw new IllegalArgumentException();
+        }
+
+        int barLength = 50;
+        int jumpLen = 100;
+
+        if (current % jumpLen != 0 && current != total) {
+            return;
+        }
+        
+        int completeLength = ((barLength * current) / total);
+
+        String complete = new String(new char[completeLength]).replace('\0', '█');
+        String incomplete = new String(new char[barLength - completeLength]).replace('\0', ' ');
+
+        System.out.print("\r" + "|" + complete + incomplete + "|" + " " + current + " / " + total);
+        if(current == total) {
+            System.out.println();
+        }
+    }
+
 
     private static String crop(String input) {
         return input.substring(0, Math.min(input.length(), MAX_INPUT_LENGTH));
@@ -89,8 +121,8 @@ public class Library {
 
     private static void appendToFile(String filepath, String message) throws IOException {
         createFileIfNotExists(filepath);
-        for(String line : readFileByLines(filepath)) {
-            if(line.equals(message)) {
+        for (String line : readFileByLines(filepath)) {
+            if (line.equals(message)) {
                 return;
             }
         }
@@ -98,13 +130,13 @@ public class Library {
     }
 
     private static String[] readFileByLines(String filepath) throws IOException {
-        if(Files.notExists(Paths.get(filepath))) {
+        if (Files.notExists(Paths.get(filepath))) {
             return new String[0];
         }
         try (BufferedReader br = new BufferedReader(new FileReader(new File(filepath)))) {
             try (Stream<String> stream = Files.lines(Paths.get(filepath), StandardCharsets.UTF_8)) {
                 String[] lines = new String[(int) stream.count()];
-                for(int i = 0; i < lines.length; lines[i++] = br.readLine());
+                for (int i = 0; i < lines.length; lines[i++] = br.readLine());
                 return lines;
             }
         }
