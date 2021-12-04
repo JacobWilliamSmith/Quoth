@@ -77,6 +77,12 @@ public class Library {
             long before = ZonedDateTime.now().toInstant().toEpochMilli();
 
             String compressedQuote = removeCharacters(quote);
+            
+            if(compressedQuote.length() < MIN_INPUT_LENGTH) {
+                System.out.println("Sorry, this quote does not contain enough information to query. Try using a longer quote.");
+                return;
+            }
+
             createFileIfNotExists(STORAGE_ROOT + "");
 
             String filepath = convertToFilePath(compressedQuote.substring(0, Math.min(0 + MAX_INPUT_LENGTH, compressedQuote.length())))+"\\sources.txt";
@@ -120,7 +126,7 @@ public class Library {
     ////////////////////////////////////////////////////////////////////////
     ///// PRIVATE METHODS: These should not be called directly by main /////
     ////////////////////////////////////////////////////////////////////////
-    
+
     private static void trackProgress(long current, long total) {
         if (current > total) {
             throw new IllegalArgumentException();
