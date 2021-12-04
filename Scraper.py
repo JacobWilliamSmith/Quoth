@@ -19,7 +19,7 @@ def pullbooks():
           continue
         bookPage = requests.get(bookURL)
         bookName = link.string
-        trunk = len(bookName) - bookName.find("(") + 1
+        trunk = len(bookName) - bookName.rfind("by") + 1
         bookName = bookName[:-trunk]
         if(bookPage.text.find("Error 404")):
           bookURL="https://www.gutenberg.org/files/" + bookID + "/" + bookID + "-0.txt"
