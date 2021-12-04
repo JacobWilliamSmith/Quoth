@@ -120,6 +120,7 @@ public class Library {
     ////////////////////////////////////////////////////////////////////////
     ///// PRIVATE METHODS: These should not be called directly by main /////
     ////////////////////////////////////////////////////////////////////////
+    
     private static void trackProgress(long current, long total) {
         if (current > total) {
             throw new IllegalArgumentException();
@@ -142,11 +143,6 @@ public class Library {
             System.out.println();
         }
     }
-
-
-    // private static String crop(String input) {
-    //     return input.substring(0, Math.min(input.length(), MAX_INPUT_LENGTH));
-    // }
 
     private static String removeCharacters(String input) {
         return input.replaceAll("[^a-zA-Z0-9]","")
