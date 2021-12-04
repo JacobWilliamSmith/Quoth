@@ -8,17 +8,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class Library {
 
-    private static final int MAX_INPUT_LENGTH = 32;
+    private static final int MAX_INPUT_LENGTH = 8;
     private static final int MIN_INPUT_LENGTH = 4;
     private static final String STORAGE_ROOT = System.getProperty("user.dir") + "\\..\\data\\";
     private static final String DEBUG_ROOT = System.getProperty("user.dir") + "\\debug\\";
     public static void main(String[] args) {
         addToLibrary(DEBUG_ROOT + "Jack and Jill.txt");
-
+        query("Jack fell down and broke his crown");
     }
 
     ///////////////////////////////////////////////////////////////////
@@ -26,7 +29,9 @@ public class Library {
     ///////////////////////////////////////////////////////////////////
 
     public static void addToLibrary(String quote, String source) {
+        delimit();
         try {
+            System.out.println("Adding " + source + " to library...");
             quote = removeCharacters(quote);
             long before = ZonedDateTime.now().toInstant().toEpochMilli();
 
@@ -63,37 +68,70 @@ public class Library {
         }
     }
 
-    public static String[] query(String input) {
+    public static void query(String quote) {
+        delimit();
         try {
-            createFileIfNotExists(STORAGE_ROOT + "quotes\\");
-            createFileIfNotExists(STORAGE_ROOT + "sources\\");
-            return readFileByLines(convertToFilePath(crop(removeCharacters(input)))+"\\sources.txt");
+            System.out.println("Looking up quote: " + quote + "\n");
+
+            long before = ZonedDateTime.now().toInstant().toEpochMilli();
+
+            String compressedQuote = removeCharacters(quote);
+            createFileIfNotExists(STORAGE_ROOT + "");
+
+            String filepath = convertToFilePath(compressedQuote.substring(0, Math.min(0 + MAX_INPUT_LENGTH, compressedQuote.length())))+"\\sources.txt";
+            Set<String> potentialQuotes = new HashSet<String>(Arrays.asList(readFileByLines(filepath)));
+
+            for (int start = 1; start + MAX_INPUT_LENGTH <= compressedQuote.length(); start++) {
+                filepath = convertToFilePath(compressedQuote.substring(start, Math.min(start + MAX_INPUT_LENGTH, compressedQuote.length())))+"\\sources.txt";
+                potentialQuotes.retainAll(new HashSet<String>(Arrays.asList(readFileByLines(filepath))));
+            }
+            
+            if(potentialQuotes.isEmpty()) {
+                System.out.println("This quote was not found");
+            } else {
+                System.out.println("This quote was found in the following:");
+                for (String s : potentialQuotes) {
+                    System.out.println(s);
+                }
+            }
+
+            long after = ZonedDateTime.now().toInstant().toEpochMilli();
+            double elapsed = (after - before) / 1000.0;
+            System.out.println("\nTime elapsed: " + elapsed + " seconds");
+
         } catch (IOException ioe) {
             System.out.println("Warning: IO Exception detected");
-            return new String[0];
         }
     }
 
     public static void deleteLibrary() {
+        delimit();
+        System.out.println("Clearing all data from library...");
+        long before = ZonedDateTime.now().toInstant().toEpochMilli();
+        
         deleteDir(new File(STORAGE_ROOT));
+
+        long after = ZonedDateTime.now().toInstant().toEpochMilli();
+        double elapsed = (after - before) / 1000.0;
+        System.out.println("Time elapsed: " + elapsed + " seconds");
     }
 
     ////////////////////////////////////////////////////////////////////////
     ///// PRIVATE METHODS: These should not be called directly by main /////
     ////////////////////////////////////////////////////////////////////////
-    private static void trackProgress(int current, int total) {
+    private static void trackProgress(long current, long total) {
         if (current > total) {
             throw new IllegalArgumentException();
         }
 
         int barLength = 50;
-        int jumpLen = 100;
+        int jumpLen = 33;
 
         if (current % jumpLen != 0 && current != total) {
             return;
         }
         
-        int completeLength = ((barLength * current) / total);
+        int completeLength = (int) ((barLength * current) / total);
 
         String complete = new String(new char[completeLength]).replace('\0', '█');
         String incomplete = new String(new char[barLength - completeLength]).replace('\0', ' ');
@@ -105,9 +143,9 @@ public class Library {
     }
 
 
-    private static String crop(String input) {
-        return input.substring(0, Math.min(input.length(), MAX_INPUT_LENGTH));
-    }
+    // private static String crop(String input) {
+    //     return input.substring(0, Math.min(input.length(), MAX_INPUT_LENGTH));
+    // }
 
     private static String removeCharacters(String input) {
         return input.replaceAll("[^a-zA-Z0-9]","")
@@ -116,7 +154,7 @@ public class Library {
     }
 
     private static String convertToFilePath(String input) {
-        return STORAGE_ROOT + "quotes\\" + input.replaceAll(".(?!$)", "$0\\\\");
+        return STORAGE_ROOT + input.replaceAll(".(?!$)", "$0\\\\");
     }
 
     private static void appendToFile(String filepath, String message) throws IOException {
@@ -149,8 +187,8 @@ public class Library {
             Files.createFile(p);
         }
     }
-    
-    private static void deleteDir(File file) {
+
+    private static void deleteDir(File file)  {
         File[] contents = file.listFiles();
         if (contents != null) {
             for (File f : contents) {
@@ -158,5 +196,9 @@ public class Library {
             }
         }
         file.delete();
+    }
+
+    private static void delimit() {
+        System.out.println("===========================================================================");
     }
 }
